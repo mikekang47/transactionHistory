@@ -1,6 +1,12 @@
 from fastapi import FastAPI
 
+from session import session_controller
+from user import user_controller
+
 app = FastAPI()
+
+app.include_router(user_controller.router)
+app.include_router(session_controller.router)
 
 
 @app.get("/")
@@ -8,6 +14,6 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+@app.get("/")
+async def say_hello():
+    return {"message": "Hello World"}
