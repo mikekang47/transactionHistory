@@ -13,7 +13,7 @@ router = APIRouter(
     prefix="/users",
 )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/session/login")
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=user_schema.UserResponse)
@@ -31,13 +31,13 @@ def get_current_user(token: str = Depends(oauth2_scheme),
     )
     try:
         payload = jwt.decode(token, jwt_config.getSecretKey(), algorithms=[jwt_config.getAlgorithm()])
-        username: str = payload.get("sub")
-        if username is None:
+        email: str = payload.get("sub")
+        if email is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
     else:
-        user = user_application.get_user(db, username=username)
+        user = user_application.get_user(db, email=email)
         if user is None:
             raise credentials_exception
         return user

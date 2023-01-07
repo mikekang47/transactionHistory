@@ -11,14 +11,20 @@ from user.user_model import User
 
 
 def create_session(db, email: str):
+    access_token_expire_time = datetime.utcnow() + timedelta(hours=9) + timedelta(
+        minutes=jwt_config.getAccessTokenExpireMinutes())
+
     access_data = {
         "sub": email,
-        "exp": datetime.utcnow() + timedelta(hours=9) + timedelta(minutes=jwt_config.getAccessTokenExpireMinutes())
+        "exp": access_token_expire_time
     }
+
+    refresh_token_expire_time = datetime.utcnow() + timedelta(hours=9) + timedelta(
+        minutes=jwt_config.getRefreshTokenExpireMinutes())
 
     refresh_data = {
         "sub": email,
-        "exp": datetime.utcnow() + timedelta(hours=9) + timedelta(minutes=jwt_config.getRefreshTokenExpireMinutes())
+        "exp": refresh_token_expire_time
     }
 
     encoded_access_token = jwt.encode(access_data, jwt_config.getSecretKey(), algorithm=jwt_config.getAlgorithm())
@@ -27,12 +33,14 @@ def create_session(db, email: str):
     # login 시 expire_time 초기화
     user = user_application.get_user(db, email=email)
     user.refresh_token = encoded_refresh_token
-    user.expire_time = refresh_data["exp"]
+    user.expire_time = refresh_token_expire_time
+
+    db.commit()
 
     _access_token = session_schema.AccessToken(access_token=encoded_access_token, token_type="bearer", email=user.email,
-                                               expire_date=access_data["exp"])
+                                               expire_date=access_token_expire_time)
     _refresh_token = session_schema.RefreshToken(refresh_token=encoded_refresh_token, token_type="bearer",
-                                                 email=user.email, expire_date=refresh_data["exp"])
+                                                 email=user.email, expire_date=refresh_token_expire_time)
     return session_schema.Token(access_token=_access_token, refresh_token=_refresh_token)
 
 
