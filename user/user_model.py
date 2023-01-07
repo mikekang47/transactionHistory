@@ -12,5 +12,3 @@ class User(Base, BaseMixin):
     password = Column(String(255), nullable=False)
     refresh_token = Column(String(255))
 
-    class Config:
-        orm_mode = True
