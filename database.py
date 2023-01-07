@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-from config import settings
+from database_config import settings
 
 engine = create_engine(
     "mysql+pymysql://{username}:{password}@{host}:{port}/{name}?charset=utf8mb4".format(
