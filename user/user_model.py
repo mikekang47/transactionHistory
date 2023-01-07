@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, DateTime
 
 from database import Base
 from models import BaseMixin
@@ -11,4 +11,4 @@ class User(Base, BaseMixin):
     email = Column(String(255), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
     refresh_token = Column(String(255))
-
+    expire_time = Column(DateTime)
