@@ -18,10 +18,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/login")
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=user_schema.UserResponse)
 def user_create(_user_create: user_schema.UserCreate, db: Session = Depends(get_db)):
-    user = user_application.get_existing_user(db, user_create=_user_create)
-    if user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="이미 존재하는 사용자입니다.")
     user = user_application.create_user(db=db, user_create=_user_create)
     return user_schema.UserResponse(nick_name=user.nick_name, email=user.email)
 
