@@ -4,20 +4,25 @@ from pydantic import BaseModel
 
 
 class RefreshToken(BaseModel):
-    refresh_token: str
+    token: str
     token_type: str
     expire_date: datetime
     email: str
+
+    @property
+    def get_token(self):
+        return self.token
 
     class Config:
         orm_mode = True
 
 
 class AccessToken(BaseModel):
-    access_token: str
+    token: str
     token_type: str
     email: str
     expire_date: datetime
+
 
     class Config:
         orm_mode = True
@@ -26,6 +31,7 @@ class AccessToken(BaseModel):
 class Token(BaseModel):
     access_token: AccessToken
     refresh_token: RefreshToken
+
 
     class Config:
         orm_mode = True

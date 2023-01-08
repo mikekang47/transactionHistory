@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Header
+from fastapi import APIRouter
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -8,7 +8,7 @@ from database import get_db
 from session import session_application, session_schema
 from user import user_application
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/session/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/session")
 
 router = APIRouter(
     prefix="/session",
@@ -20,7 +20,7 @@ def login(login_data: OAuth2PasswordRequestForm = Depends(),
           db: Session = Depends(get_db)):
     # check user and password
     user = user_application.get_user(db, email=login_data.username)
-    session_application.verfiy(user, login_data.password)
+    session_application.verify_password(user, login_data.password)
 
     return session_application.create_session(db, user.email)
 
@@ -29,3 +29,9 @@ def login(login_data: OAuth2PasswordRequestForm = Depends(),
 def logout(token: str = Depends(oauth2_scheme),
            db: Session = Depends(get_db)):
     session_application.delete_session(db, token)
+
+
+@router.get("/refresh", status_code=status.HTTP_200_OK, response_model=session_schema.Token)
+def get_access_token(refresh_token: str = Depends(oauth2_scheme),
+                     db: Session = Depends(get_db)):
+    return session_application.get_access_token(db, refresh_token)

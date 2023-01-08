@@ -1,5 +1,7 @@
 from pydantic import BaseModel, validator, EmailStr
 
+from error import requests_exception
+
 
 class UserCreate(BaseModel):
     nick_name: str
@@ -10,13 +12,13 @@ class UserCreate(BaseModel):
     @validator('nick_name', 'email', 'password', 'retype_password')
     def not_empty(cls, v):
         if not v or not v.strip():
-            raise ValueError('must not be empty')
+            raise requests_exception.EmptyFieldException()
         return v
 
     @validator('retype_password')
     def password_match(cls, v, values):
         if 'password' in values and v != values['password']:
-            raise ValueError('passwords do not match')
+            raise requests_exception.PasswordNotMatchException()
         return v
 
 
