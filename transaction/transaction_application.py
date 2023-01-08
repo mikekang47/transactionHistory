@@ -8,7 +8,8 @@ from user.user_model import User
 
 def get_transactions(db: Session, user_id: int):
     return db.query(History).outerjoin(User, User.id == History.user_id) \
-        .filter(User.id == user_id).all()
+        .filter(User.id == user_id) \
+        .filter(not History.is_deleted).all()
 
 
 def get_transaction(db: Session, transaction_id: int, current_user_id: int):
@@ -50,7 +51,7 @@ def delete_transaction(db, transaction_id, current_user_id):
 
 
 def __find_history(db, transaction_id):
-    history = db.query(History).filter(History.id == transaction_id).first()
+    history = db.query(History).filter(History.id == transaction_id).filter(not History.is_deleted).first()
     if history is None:
         raise transaction_exception.HistoryNotFoundException()
     return history
