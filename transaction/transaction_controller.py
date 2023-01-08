@@ -85,6 +85,6 @@ def shortcut_transaction(transaction_id: int, db: Session = Depends(get_db),
     hostname = socket.gethostname()
     ip_address = socket.gethostbyname(hostname)
 
-    url = f"http://{ip_address}:80/opentransactions/{transaction_id}"
+    url = f"https://{ip_address}:80/opentransactions/{transaction_id}"
     s = pyshorteners.Shortener(timeout=60 * 10).tinyurl.short(url)
     return {"message": f"Shortcut url: {s}"}
