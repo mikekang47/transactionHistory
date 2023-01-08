@@ -1,5 +1,9 @@
+import socket
 from typing import List
 
+import pyperclip
+import pyshorteners
+import pyshorteners.base
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
@@ -9,7 +13,6 @@ from database import get_db
 from transaction import transaction_application, transaction_schema
 from user.user_controller import get_current_user
 from user.user_model import User
-import pyperclip
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/transactions")
 
@@ -72,3 +75,16 @@ def copy_transaction(transaction_id: int, db: Session = Depends(get_db),
     transaction = transaction_application.get_transaction(db, transaction_id, current_user.id)
     pyperclip.copy(transaction.detail)
     return {"message": "Copy transaction detail to clipboard"}
+
+
+@router.get("/shortcut/{transaction_id}", status_code=status.HTTP_200_OK)
+def shortcut_transaction(transaction_id: int, db: Session = Depends(get_db),
+                         current_user: User = Depends(get_current_user)):
+    transaction_application.get_transaction(db, transaction_id, current_user.id)
+
+    hostname = socket.gethostname()
+    ip_address = socket.gethostbyname(hostname)
+
+    url = f"http://{ip_address}:80/opentransactions/{transaction_id}"
+    s = pyshorteners.Shortener(timeout=60 * 10).tinyurl.short(url)
+    return {"message": f"Shortcut url: {s}"}

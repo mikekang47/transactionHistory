@@ -59,3 +59,7 @@ def __find_history(db, transaction_id):
 def __verify_history_writer(current_user_id, history):
     if history.user_id != current_user_id:
         raise credentials_exception.ForbiddenException()
+
+
+def get_open_transaction(db, transaction_id):
+    return __find_history(db, transaction_id)
