@@ -9,6 +9,7 @@ from database import get_db
 from transaction import transaction_application, transaction_schema
 from user.user_controller import get_current_user
 from user.user_model import User
+import clipboard
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/transactions")
 
@@ -63,3 +64,11 @@ def update_transaction(transaction_id: int, _transaction_request: transaction_sc
 def delete_transaction(transaction_id: int, db: Session = Depends(get_db),
                        current_user: User = Depends(get_current_user)):
     transaction_application.delete_transaction(db=db, transaction_id=transaction_id, current_user_id=current_user.id)
+
+
+@router.get("/copy/{transaction_id}", status_code=status.HTTP_200_OK)
+def copy_transaction(transaction_id: int, db: Session = Depends(get_db),
+                     current_user: User = Depends(get_current_user)):
+    transaction = transaction_application.get_transaction(db, transaction_id, current_user.id)
+    clipboard.copy(transaction.detail)
+    return {"message": "Copy transaction detail to clipboard"}
