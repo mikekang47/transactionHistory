@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from jose import jwt, JWTError, ExpiredSignatureError
 
 import jwt_config
-from error import login_fail_exception, credential_exception, user_not_found_exception
+from error import login_fail_exception, credentials_exception, user_not_found_exception
 from session import session_schema
 from user import user_application
 from user.user_application import pwd_context
@@ -49,11 +49,11 @@ def delete_session(db, token):
         payload = jwt.decode(token, key=jwt_config.getSecretKey(), algorithms=[jwt_config.getAlgorithm()])
         email: str = payload.get("sub")
         if email is None:
-            raise credential_exception.CredentialExcpetion()
+            raise credentials_exception.CredentialExcpetion()
     except ExpiredSignatureError:
-        raise credential_exception.TokenTimeOutException()
+        raise credentials_exception.TokenTimeOutException()
     except JWTError:
-        raise credential_exception.CredentialExcpetion()
+        raise credentials_exception.CredentialExcpetion()
     else:
         user = user_application.get_user(db, email=email)
         if user is None:
@@ -64,6 +64,6 @@ def delete_session(db, token):
         return user
 
 
-def verfiy(user: User, login_data_password: str):
+def verify_password(user: User, login_data_password: str):
     if not user or not pwd_context.verify(login_data_password, user.password):
         raise login_fail_exception.LoginFailException()
