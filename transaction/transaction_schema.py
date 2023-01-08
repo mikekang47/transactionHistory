@@ -2,9 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, validator
 
+from error import requests_exception
 
-# TODO
-# HTTP error로 변경하기
 
 class HistoryResponse(BaseModel):
     id: int
@@ -24,11 +23,11 @@ class HistoryRequest(BaseModel):
     @validator('money')
     def is_lower_than_zero(cls, v: int):
         if v < 0:
-            raise ValueError('must be greater than zero')
+            raise requests_exception.LowerMoneyException()
         return v
 
     @validator('detail')
     def is_empty(cls, v: str):
         if not v or not v.strip():
-            raise ValueError('must not be empty')
+            raise requests_exception.EmptyDetailException()
         return v

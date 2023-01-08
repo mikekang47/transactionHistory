@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from error import credentials_exception, history_not_found_exception
+from error import authentication_exception, transaction_exception
 from transaction import transaction_schema
 from transaction.transaction_model import History
 from user.user_model import User
@@ -52,13 +52,13 @@ def delete_transaction(db, transaction_id, current_user_id):
 def __find_history(db, transaction_id):
     history = db.query(History).filter(History.id == transaction_id).first()
     if history is None:
-        raise history_not_found_exception.NotFoundException()
+        raise transaction_exception.HistoryNotFoundException()
     return history
 
 
 def __verify_history_writer(current_user_id, history):
     if history.user_id != current_user_id:
-        raise credentials_exception.ForbiddenException()
+        raise authentication_exception.ForbiddenException()
 
 
 def get_open_transaction(db, transaction_id):
