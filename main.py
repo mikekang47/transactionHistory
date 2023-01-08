@@ -11,6 +11,7 @@ app.include_router(session_controller.router)
 app.include_router(transaction_controller.router)
 app.include_router(open_transaction_controller.router)
 
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
