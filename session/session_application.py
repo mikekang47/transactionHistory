@@ -11,8 +11,8 @@ def create_session(db, email: str):
     tokens = jwt_util.create_tokens(email)
 
     user = user_application.get_user(db, email=email)
-    user.refresh_token = tokens.get_refresh_token().get_token()
-    user.expire_time = tokens.get_refresh_token().expire_date
+    user.refresh_token = tokens.refresh_token.token
+    user.expire_time = tokens.refresh_token.expire_date
 
     db.commit()
 
@@ -40,8 +40,8 @@ def get_access_token(db, refresh_token):
 
     tokens = jwt_util.create_tokens(email)
 
-    user.refresh_token = tokens.get_refresh_token().get_token()
-    user.expire_time = tokens.get_refresh_token().expire_date
+    user.refresh_token = tokens.refresh_token.token
+    user.expire_time = tokens.refresh_token.expire_date
 
     db.commit()
 

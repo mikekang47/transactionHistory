@@ -11,9 +11,9 @@ from session import session_schema
 def create_tokens(email):
     access_token, access_token_expire_time = __generate_access_token(email)
     refresh_token, refresh_token_expire_time = __generate_refresh_token(email)
-    _access_token = session_schema.AccessToken(_token=access_token, token_type="bearer", email=email,
+    _access_token = session_schema.AccessToken(token=access_token, token_type="bearer", email=email,
                                                expire_date=access_token_expire_time)
-    _refresh_token = session_schema.RefreshToken(_token=refresh_token, token_type="bearer",
+    _refresh_token = session_schema.RefreshToken(token=refresh_token, token_type="bearer",
                                                  email=email, expire_date=refresh_token_expire_time)
 
     return session_schema.Token(access_token=_access_token, refresh_token=_refresh_token)
