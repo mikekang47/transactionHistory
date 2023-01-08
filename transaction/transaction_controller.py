@@ -30,7 +30,7 @@ def get_transactions_by_user_id(current_user: User = Depends(get_current_user),
 @router.get("/{transaction_id}", response_model=transaction_schema.HistoryResponse)
 def get_transaction_by_id(transaction_id: int, current_user: User = Depends(get_current_user),
                           db: Session = Depends(get_db)):
-    transaction = transaction_application.get_transaction(db, transaction_id)
+    transaction = transaction_application.get_transaction(db, transaction_id, current_user.id)
     return transaction_schema.HistoryResponse(id=transaction.id, detail=transaction.detail, money=transaction.money,
                                               created_at=transaction.created_at,
                                               updated_at=transaction.updated_at)
