@@ -27,3 +27,9 @@ class TokenInvalidException(HTTPException):
         super().__init__(status_code=status.HTTP_401_UNAUTHORIZED,
                          detail="Token invalid",
                          headers={"WWW-Authenticate": "Bearer"})
+
+
+class UnknownHeaderException(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED,
+                         detail="Unknown Header")

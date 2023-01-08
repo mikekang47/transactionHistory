@@ -10,8 +10,8 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 from database import get_db
+from filter.jwt_authentication_filter import get_current_user_authorizer
 from transaction import transaction_application, transaction_schema
-from user.user_controller import get_current_user
 from user.user_model import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/transactions")
@@ -22,7 +22,7 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[transaction_schema.HistoryResponse])
-def get_transactions_by_user_id(current_user: User = Depends(get_current_user),
+def get_transactions_by_user_id(current_user: User = Depends(get_current_user_authorizer()),
                                 db: Session = Depends(get_db)):
     transactions = transaction_application.get_transactions(db, current_user.id)
     return list(
@@ -33,7 +33,7 @@ def get_transactions_by_user_id(current_user: User = Depends(get_current_user),
 
 
 @router.get("/{transaction_id}", response_model=transaction_schema.HistoryResponse)
-def get_transaction_by_id(transaction_id: int, current_user: User = Depends(get_current_user),
+def get_transaction_by_id(transaction_id: int, current_user: User = Depends(get_current_user_authorizer()),
                           db: Session = Depends(get_db)):
     transaction = transaction_application.get_transaction(db, transaction_id, current_user.id)
     return transaction_schema.HistoryResponse(id=transaction.id, detail=transaction.detail, money=transaction.money,
@@ -43,7 +43,7 @@ def get_transaction_by_id(transaction_id: int, current_user: User = Depends(get_
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=transaction_schema.HistoryResponse)
 def create_transaction(_transaction_request: transaction_schema.HistoryRequest,
-                       db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+                       db: Session = Depends(get_db), current_user: User = Depends(get_current_user_authorizer())):
     transaction = transaction_application.create_transaction(db=db,
                                                              transaction_request=_transaction_request,
                                                              current_user_id=current_user.id)
@@ -54,7 +54,7 @@ def create_transaction(_transaction_request: transaction_schema.HistoryRequest,
 
 @router.put("/{transaction_id}", status_code=status.HTTP_200_OK, response_model=transaction_schema.HistoryResponse)
 def update_transaction(transaction_id: int, _transaction_request: transaction_schema.HistoryRequest,
-                       db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+                       db: Session = Depends(get_db), current_user: User = Depends(get_current_user_authorizer())):
     transaction = transaction_application.update_transaction(db=db, transaction_id=transaction_id,
                                                              transaction_request=_transaction_request,
                                                              current_user_id=current_user.id)
@@ -65,13 +65,13 @@ def update_transaction(transaction_id: int, _transaction_request: transaction_sc
 
 @router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_transaction(transaction_id: int, db: Session = Depends(get_db),
-                       current_user: User = Depends(get_current_user)):
+                       current_user: User = Depends(get_current_user_authorizer())):
     transaction_application.delete_transaction(db=db, transaction_id=transaction_id, current_user_id=current_user.id)
 
 
 @router.get("/copy/{transaction_id}", status_code=status.HTTP_200_OK)
 def copy_transaction(transaction_id: int, db: Session = Depends(get_db),
-                     current_user: User = Depends(get_current_user)):
+                     current_user: User = Depends(get_current_user_authorizer())):
     transaction = transaction_application.get_transaction(db, transaction_id, current_user.id)
     pyperclip.copy(transaction.detail)
     return {"message": "Copy transaction detail to clipboard"}
@@ -79,7 +79,7 @@ def copy_transaction(transaction_id: int, db: Session = Depends(get_db),
 
 @router.get("/shortcut/{transaction_id}", status_code=status.HTTP_200_OK)
 def shortcut_transaction(transaction_id: int, db: Session = Depends(get_db),
-                         current_user: User = Depends(get_current_user)):
+                         current_user: User = Depends(get_current_user_authorizer())):
     transaction_application.get_transaction(db, transaction_id, current_user.id)
 
     hostname = socket.gethostname()
