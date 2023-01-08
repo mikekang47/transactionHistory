@@ -12,3 +12,7 @@ class History(Base, BaseMixin):
     detail = Column(String(255), nullable=True, default='')
     money = Column(Integer, nullable=False, default=0)
     user = relationship('User', backref=backref('histories', order_by=id))
+
+    def updateHistory(self, detail, money):
+        self.detail = detail
+        self.money = money

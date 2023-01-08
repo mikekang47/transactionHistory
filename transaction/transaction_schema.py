@@ -17,7 +17,7 @@ class HistoryResponse(BaseModel):
         orm_mode = True
 
 
-class HistoryCreate(BaseModel):
+class HistoryRequest(BaseModel):
     money: int
     detail: str
 

@@ -18,9 +18,22 @@ def get_transaction(db: Session, transaction_id: int, current_user_id: int):
     return history
 
 
-def create_transaction(db: Session, transaction_create_request: transaction_schema.HistoryCreate, current_user_id: int):
-    history = History(detail=transaction_create_request.detail, money=transaction_create_request.money,
+def create_transaction(db: Session, transaction_request: transaction_schema.HistoryRequest, current_user_id: int):
+    history = History(detail=transaction_request.detail, money=transaction_request.money,
                       user_id=current_user_id)
     db.add(history)
     db.commit()
+    return history
+
+
+def update_transaction(db: Session, transaction_id: int, transaction_request: transaction_schema.HistoryRequest,
+                       current_user_id: int):
+    history = db.query(History).filter(History.id == transaction_id).first()
+    if history.user_id != current_user_id:
+        raise credentials_exception.ForbiddenException()
+
+    history.updateHistory(transaction_request.detail, transaction_request.money)
+
+    db.commit()
+
     return history
