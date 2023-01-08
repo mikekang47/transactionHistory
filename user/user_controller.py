@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
@@ -7,6 +7,7 @@ from starlette import status
 
 import jwt_config
 from database import get_db
+from error import credentials_exception
 from user import user_application, user_schema
 
 router = APIRouter(
@@ -24,20 +25,15 @@ def user_create(_user_create: user_schema.UserCreate, db: Session = Depends(get_
 
 def get_current_user(token: str = Depends(oauth2_scheme),
                      db: Session = Depends(get_db)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
     try:
         payload = jwt.decode(token, jwt_config.getSecretKey(), algorithms=[jwt_config.getAlgorithm()])
         email: str = payload.get("sub")
         if email is None:
-            raise credentials_exception
+            raise credentials_exception.CredentialExcpetion()
     except JWTError:
-        raise credentials_exception
+        raise credentials_exception.CredentialExcpetion()
     else:
         user = user_application.get_user(db, email=email)
         if user is None:
-            raise credentials_exception
+            raise credentials_exception.CredentialExcpetion()
         return user
