@@ -57,3 +57,9 @@ def update_transaction(transaction_id: int, _transaction_request: transaction_sc
     return transaction_schema.HistoryResponse(id=transaction.id, detail=transaction.detail, money=transaction.money,
                                               created_at=transaction.created_at,
                                               updated_at=transaction.updated_at)
+
+
+@router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_transaction(transaction_id: int, db: Session = Depends(get_db),
+                       current_user: User = Depends(get_current_user)):
+    transaction_application.delete_transaction(db=db, transaction_id=transaction_id, current_user_id=current_user.id)

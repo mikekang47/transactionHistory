@@ -37,3 +37,11 @@ def update_transaction(db: Session, transaction_id: int, transaction_request: tr
     db.commit()
 
     return history
+
+
+def delete_transaction(db, transaction_id, current_user_id):
+    history = db.query(History).filter(History.id == transaction_id).first()
+    if history.user_id != current_user_id:
+        raise credentials_exception.ForbiddenException()
+    db.query(History).filter(History.id == transaction_id).delete()
+    db.commit()
