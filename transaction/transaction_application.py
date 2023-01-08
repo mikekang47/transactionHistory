@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from error import authentication_exception, transaction_exception
+from error import security_exception, transaction_exception
 from transaction import transaction_schema
 from transaction.transaction_model import History
 from user.user_model import User
@@ -58,7 +58,7 @@ def __find_history(db, transaction_id):
 
 def __verify_history_writer(current_user_id, history):
     if history.user_id != current_user_id:
-        raise authentication_exception.ForbiddenException()
+        raise security_exception.ForbiddenException()
 
 
 def get_open_transaction(db, transaction_id):
