@@ -29,33 +29,36 @@ def extract_email_from_token(token):
 
 def __generate_access_token(email):
     access_token_expire_time = datetime.utcnow() + timedelta(hours=9) + timedelta(
-        minutes=jwt_config.getAccessTokenExpireMinutes())
+        minutes=jwt_config.JwtConfig.get_access_token_expire_minutes())
 
     access_data = {
         "sub": email,
         "exp": access_token_expire_time
     }
 
-    encoded_access_token = jwt.encode(access_data, jwt_config.getSecretKey(), algorithm=jwt_config.getAlgorithm())
+    encoded_access_token = jwt.encode(access_data, jwt_config.JwtConfig.get_secret_key(),
+                                      algorithm=jwt_config.JwtConfig.get_algorithm())
     return encoded_access_token, access_token_expire_time
 
 
 def __generate_refresh_token(email):
     refresh_token_expire_time = datetime.utcnow() + timedelta(hours=9) + timedelta(
-        minutes=jwt_config.getRefreshTokenExpireMinutes())
+        minutes=jwt_config.JwtConfig.get_refresh_token_expire_minutes())
 
     refresh_data = {
         "sub": email,
         "exp": refresh_token_expire_time
     }
 
-    encoded_refresh_token = jwt.encode(refresh_data, jwt_config.getSecretKey(), algorithm=jwt_config.getAlgorithm())
+    encoded_refresh_token = jwt.encode(refresh_data, jwt_config.JwtConfig.get_secret_key(),
+                                       algorithm=jwt_config.JwtConfig.get_algorithm())
     return encoded_refresh_token, refresh_token_expire_time
 
 
 def __verify_token(token):
     try:
-        return jwt.decode(token, key=jwt_config.getSecretKey(), algorithms=[jwt_config.getAlgorithm()])
+        return jwt.decode(token, key=jwt_config.JwtConfig.get_secret_key(),
+                          algorithms=[jwt_config.JwtConfig.get_algorithm()])
     except JWTClaimsError:
         raise security_exception.TokenInvalidException()
     except ExpiredSignatureError:
