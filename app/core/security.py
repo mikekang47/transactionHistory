@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 
 from jose import jwt
 
-from app.core.cofig import settings
+from app.core.config import settings
 from app.crud.crud_user import pwd_context
 from app.schemas.token import AccessToken, RefreshToken, Token
 

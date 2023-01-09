@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 from app import crud
-from app.core.cofig import settings
+from app.core.config import settings
 from app.models import User
 from database import SessionLocal
 

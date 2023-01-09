@@ -14,7 +14,6 @@ from database import get_db
 router = APIRouter()
 
 
-
 @router.post("/login", response_model=Token)
 def login(
         db: Session = Depends(get_db),
