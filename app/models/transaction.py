@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import relationship, backref
 
-from database import Base
-from models import BaseMixin
+from app.core.session import Base
+from app.models.base_time import BaseMixin
 
 
 class History(Base, BaseMixin):

@@ -2,15 +2,15 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from database_config import settings
+from app.core.config import settings
 
 engine = create_engine(
     "mysql+pymysql://{username}:{password}@{host}:{port}/{name}?charset=utf8mb4".format(
-        username=settings.DB_USERNAME,
-        password=settings.DB_PASSWORD.get_secret_value(),
-        host=settings.DB_HOST,
-        port=settings.DB_PORT,
-        name=settings.DB_NAME,
+        username=settings.MYSQL_USER,
+        password=settings.MYSQL_PASSWORD.get_secret_value(),
+        host=settings.MYSQL_HOST,
+        port=settings.MYSQL_PORT,
+        name=settings.MYSQL_DB,
     )
 )
 
@@ -21,11 +21,3 @@ SessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()

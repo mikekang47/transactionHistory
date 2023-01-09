@@ -6,8 +6,8 @@ from pydantic import BaseModel
 class RefreshToken(BaseModel):
     token: str
     token_type: str
-    expire_date: datetime
     email: str
+    expire_date: datetime
 
     @property
     def get_token(self):
@@ -23,7 +23,6 @@ class AccessToken(BaseModel):
     email: str
     expire_date: datetime
 
-
     class Config:
         orm_mode = True
 
@@ -31,7 +30,6 @@ class AccessToken(BaseModel):
 class Token(BaseModel):
     access_token: AccessToken
     refresh_token: RefreshToken
-
 
     class Config:
         orm_mode = True
