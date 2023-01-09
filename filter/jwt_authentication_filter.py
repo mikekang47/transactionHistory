@@ -45,7 +45,6 @@ def get_authorization_header(
         api_key: str = Security(GetAPIKeyHeader(name=HEADER_KEY)),
         jwt_config: JwtConfig = Depends(get_jwt_config),
 ) -> str:
-    print(api_key)
     try:
         token_prefix, token = api_key.split(" ")
     except ValueError:
