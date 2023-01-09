@@ -7,10 +7,10 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 from app import crud, models
+from app.api.api_v1.deps import get_current_user
 from app.models.user import User
 from app.schemas.transaction import HistoryResponse
 from database import get_db
-from filter.jwt_authentication_filter import get_current_user_authorizer
 
 router = APIRouter()
 
@@ -21,7 +21,7 @@ def read_transactions(
         db: Session = Depends(get_db),
         skip: int = 0,
         limit: int = 100,
-        current_user: User = Depends(get_current_user_authorizer())
+        current_user: User = Depends(get_current_user)
 ) -> Any:
     transactions = crud.transaction.get_transactions(db, user_id=current_user.id, skip=skip, limit=limit)
     return list(
@@ -36,7 +36,7 @@ def read_transaction(
         *,
         db: Session = Depends(get_db),
         transaction_id: int,
-        current_user: models.User = Depends(get_current_user_authorizer())
+        current_user: models.User = Depends(get_current_user)
 ) -> Any:
     transaction = crud.transaction.get_transaction(db, tansaction_id=transaction_id, user_id=current_user.id)
     return HistoryResponse(id=transaction.id, detail=transaction.detail, money=transaction.money,
@@ -49,7 +49,7 @@ def create_transaction(
         *,
         db: Session = Depends(get_db),
         transaction_request: HistoryResponse,
-        current_user: models.User = Depends(get_current_user_authorizer())
+        current_user: models.User = Depends(get_current_user)
 ) -> Any:
     transaction = crud.transaction.create_transaction(db=db,
                                                       transaction_request=transaction_request,
@@ -65,7 +65,7 @@ def update(
         db: Session = Depends(get_db),
         transaction_id: int,
         transaction_request: HistoryResponse,
-        current_user: models.User = Depends(get_current_user_authorizer())
+        current_user: models.User = Depends(get_current_user)
 ) -> Any:
     transaction = crud.transaction.update_transaction(db=db, transaction_id=transaction_id,
                                                       transaction_request=transaction_request,
@@ -80,7 +80,7 @@ def delete_transaction(
         *,
         db: Session = Depends(get_db),
         transaction_id: int,
-        current_user: models.User = Depends(get_current_user_authorizer())
+        current_user: models.User = Depends(get_current_user)
 ) -> Any:
     crud.transaction.delete_transaction(db, transaction_id=transaction_id, current_user_id=current_user.id)
 
@@ -90,7 +90,7 @@ def shortcut_transaction(
         *,
         db: Session = Depends(get_db),
         transaction_id: int,
-        current_user: models.User = Depends(get_current_user_authorizer())
+        current_user: models.User = Depends(get_current_user)
 ) -> Any:
     crud.transaction.get_transaction(db, transaction_id=transaction_id, user_id=current_user.id)
 

@@ -38,5 +38,12 @@ class CRUDUser(CRUDBase[User, UserCreate]):
                                 detail="User not found")
         return source
 
+    def authenticate(self, db: Session, *, email: str, password: str) -> User:
+        user = self.get_user_by_email(db, email=email)
+        if not pwd_context.verify(password, user.password):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                detail="Incorrect password")
+        return user
+
 
 user = CRUDUser(User)
