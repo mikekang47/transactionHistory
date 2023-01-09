@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app import schemas
 from app.crud import crud_user
 from app.schemas import UserResponse
-from database import get_db
+from app.api.api_v1.deps import get_db
 
 router = APIRouter()
 

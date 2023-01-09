@@ -6,13 +6,13 @@ from starlette import status
 
 from app.models.transaction import History
 from app.models.user import User
-from app.schemas.transaction import HistoryRequest
+from app.schemas.transaction import HistoryCreate
 
 
 class CRUDTransaction:
     def get_transactions(self, db: Session, *, user_id: int, skip: int = 0, limit: int = 100) -> List[History]:
         return db.query(History).outerjoin(User, User.id == History.user_id) \
-            .filter(User.id == user_id) \
+            .filter(History.user_id == user_id) \
             .filter(History.is_deleted == False) \
             .offset(skip) \
             .limit(limit) \
@@ -28,7 +28,7 @@ class CRUDTransaction:
     def get_open_transaction(self, db, *, transaction_id):
         return self.__find_history(db, transaction_id=transaction_id)
 
-    def create_transaction(self, db: Session, *, transaction_request: HistoryRequest,
+    def create_transaction(self, db: Session, *, transaction_request: HistoryCreate,
                            user_id: int) -> History:
         history = History(detail=transaction_request.detail, money=transaction_request.money,
                           user_id=user_id)
@@ -36,7 +36,7 @@ class CRUDTransaction:
         db.commit()
         return history
 
-    def update_transaction(self, db: Session, *, transaction_id: int, transaction_request: HistoryRequest,
+    def update_transaction(self, db: Session, *, transaction_id: int, transaction_request: HistoryCreate,
                            user_id: int):
         history = self.__find_history(db, transaction_id=transaction_id)
 

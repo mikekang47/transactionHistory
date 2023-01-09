@@ -1,17 +1,13 @@
 from fastapi import HTTPException
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from starlette import status
 
-from app.core.security import verify_password
-from app.crud.base import CRUDBase
+from app.core.security import verify_password, get_password_hash
 from app.models.user import User
 from app.schemas import UserCreate
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-
-class CRUDUser(CRUDBase[User, UserCreate]):
+class CRUDUser:
     def create_user(self, db: Session, *, user_create: UserCreate):
         exists_user = self.__get_existing_user(db, user_create=user_create)
         if exists_user is not None:
@@ -20,7 +16,7 @@ class CRUDUser(CRUDBase[User, UserCreate]):
 
         source = User(nick_name=user_create.nick_name,
                       email=user_create.email,
-                      password=pwd_context.hash(user_create.password))
+                      password=get_password_hash(user_create.password))
 
         db.add(source)
         db.commit()
@@ -47,4 +43,4 @@ class CRUDUser(CRUDBase[User, UserCreate]):
         return user
 
 
-user = CRUDUser(User)
+user = CRUDUser()

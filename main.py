@@ -1,15 +1,11 @@
 from fastapi import FastAPI
 
-from session import session_controller
-from transaction import transaction_controller, open_transaction_controller
-from user import user_controller
+from app.api.api_v1.api import api_router
+from app.core.config import settings
 
 app = FastAPI()
 
-app.include_router(user_controller.router)
-app.include_router(session_controller.router)
-app.include_router(transaction_controller.router)
-app.include_router(open_transaction_controller.router)
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/")

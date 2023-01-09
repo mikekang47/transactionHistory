@@ -1,16 +1,17 @@
 import socket
-from typing import List, Any
+from typing import Any, List, Optional
 
+import pyperclip
 import pyshorteners
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from starlette import status
 
 from app import crud, models
-from app.api.api_v1.deps import get_current_user
+from app.api.api_v1.deps import get_current_user_authorizer
+from app.api.api_v1.deps import get_db
 from app.models.user import User
-from app.schemas.transaction import HistoryResponse
-from database import get_db
+from app.schemas.transaction import HistoryResponse, HistoryCreate, HistoryUpdate
 
 router = APIRouter()
 
@@ -19,9 +20,9 @@ router = APIRouter()
 def read_transactions(
         *,
         db: Session = Depends(get_db),
-        skip: int = 0,
-        limit: int = 100,
-        current_user: User = Depends(get_current_user)
+        skip: Optional[int] = 0,
+        limit: Optional[int] = 100,
+        current_user: User = Depends(get_current_user_authorizer())
 ) -> Any:
     transactions = crud.transaction.get_transactions(db, user_id=current_user.id, skip=skip, limit=limit)
     return list(
@@ -36,9 +37,9 @@ def read_transaction(
         *,
         db: Session = Depends(get_db),
         transaction_id: int,
-        current_user: models.User = Depends(get_current_user)
+        current_user: models.User = Depends(get_current_user_authorizer())
 ) -> Any:
-    transaction = crud.transaction.get_transaction(db, tansaction_id=transaction_id, user_id=current_user.id)
+    transaction = crud.transaction.get_transaction(db, transaction_id=transaction_id, user_id=current_user.id)
     return HistoryResponse(id=transaction.id, detail=transaction.detail, money=transaction.money,
                            created_at=transaction.created_at,
                            updated_at=transaction.updated_at)
@@ -48,12 +49,12 @@ def read_transaction(
 def create_transaction(
         *,
         db: Session = Depends(get_db),
-        transaction_request: HistoryResponse,
-        current_user: models.User = Depends(get_current_user)
+        transaction_request: HistoryCreate,
+        current_user: models.User = Depends(get_current_user_authorizer())
 ) -> Any:
     transaction = crud.transaction.create_transaction(db=db,
                                                       transaction_request=transaction_request,
-                                                      current_user_id=current_user.id)
+                                                      user_id=current_user.id)
     return HistoryResponse(id=transaction.id, detail=transaction.detail, money=transaction.money,
                            created_at=transaction.created_at,
                            updated_at=transaction.updated_at)
@@ -64,12 +65,12 @@ def update(
         *,
         db: Session = Depends(get_db),
         transaction_id: int,
-        transaction_request: HistoryResponse,
-        current_user: models.User = Depends(get_current_user)
+        transaction_request: HistoryUpdate,
+        current_user: models.User = Depends(get_current_user_authorizer())
 ) -> Any:
     transaction = crud.transaction.update_transaction(db=db, transaction_id=transaction_id,
                                                       transaction_request=transaction_request,
-                                                      current_user_id=current_user.id)
+                                                      user_id=current_user.id)
     return HistoryResponse(id=transaction.id, detail=transaction.detail, money=transaction.money,
                            created_at=transaction.created_at,
                            updated_at=transaction.updated_at)
@@ -80,9 +81,9 @@ def delete_transaction(
         *,
         db: Session = Depends(get_db),
         transaction_id: int,
-        current_user: models.User = Depends(get_current_user)
+        current_user: models.User = Depends(get_current_user_authorizer())
 ) -> Any:
-    crud.transaction.delete_transaction(db, transaction_id=transaction_id, current_user_id=current_user.id)
+    crud.transaction.delete_transaction(db, transaction_id=transaction_id, user_id=current_user.id)
 
 
 @router.get("/shortcut/{transaction_id}", status_code=status.HTTP_200_OK)
@@ -90,7 +91,7 @@ def shortcut_transaction(
         *,
         db: Session = Depends(get_db),
         transaction_id: int,
-        current_user: models.User = Depends(get_current_user)
+        current_user: models.User = Depends(get_current_user_authorizer())
 ) -> Any:
     crud.transaction.get_transaction(db, transaction_id=transaction_id, user_id=current_user.id)
 
@@ -100,3 +101,11 @@ def shortcut_transaction(
     url = f"https://{ip_address}:80/opentransactions/{transaction_id}"
     s = pyshorteners.Shortener(timeout=60 * 10).tinyurl.short(url)
     return {"message": f"Shortcut url: {s}"}
+
+
+@router.get("/copy/{transaction_id}", status_code=status.HTTP_200_OK)
+def copy_transaction(transaction_id: int, db: Session = Depends(get_db),
+                     current_user: User = Depends(get_current_user_authorizer())):
+    transaction = crud.transaction.get_transaction(db, transaction_id=transaction_id, user_id=current_user.id)
+    pyperclip.copy(transaction.detail)
+    return {"message": "Copy transaction detail to clipboard"}

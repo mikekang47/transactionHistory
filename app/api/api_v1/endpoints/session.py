@@ -6,10 +6,10 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 from app import crud
-from app.api.api_v1.deps import get_current_user
+from app.api.api_v1.deps import get_current_user_authorizer
 from app.models import User
 from app.schemas.token import Token
-from database import get_db
+from app.api.api_v1.deps import get_db
 
 router = APIRouter()
 
@@ -25,11 +25,11 @@ def login(
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout(db: Session = Depends(get_db),
-           current_user: User = Depends(get_current_user)) -> Any:
+           current_user: User = Depends(get_current_user_authorizer())) -> Any:
     crud.session.delete_session(db, current_user=current_user)
 
 
 @router.post("/refresh", status_code=status.HTTP_200_OK, response_model=Token)
 def get_access_token(db: Session = Depends(get_db),
-                     current_user: User = Depends(get_current_user)) -> Any:
+                     current_user: User = Depends(get_current_user_authorizer())) -> Any:
     return crud.session.get_access_token(db, current_user=current_user)

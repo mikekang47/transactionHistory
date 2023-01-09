@@ -1,11 +1,14 @@
 from fastapi import HTTPException
-from pydantic import BaseModel, validator, EmailStr
+from pydantic import BaseModel, EmailStr, validator
 from starlette import status
 
 
-class UserCreate(BaseModel):
+class User(BaseModel):
     nick_name: str
     email: EmailStr
+
+
+class UserCreate(User):
     password: str
     retype_password: str
 
@@ -24,9 +27,6 @@ class UserCreate(BaseModel):
         return v
 
 
-class UserResponse(BaseModel):
-    nick_name: str
-    email: str
-
+class UserResponse(User):
     class Config:
-        orm_mode = True
+        orm_mod = True
