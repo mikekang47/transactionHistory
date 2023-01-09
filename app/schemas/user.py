@@ -1,9 +1,8 @@
+from fastapi import HTTPException
 from pydantic import BaseModel, validator, EmailStr
+from starlette import status
 
-from error import requests_exception
 
-# TODO
-# 상속 구조로 개편
 class UserCreate(BaseModel):
     nick_name: str
     email: EmailStr
@@ -13,13 +12,15 @@ class UserCreate(BaseModel):
     @validator('nick_name', 'email', 'password', 'retype_password')
     def not_empty(cls, v):
         if not v or not v.strip():
-            raise requests_exception.EmptyFieldException()
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="user information field must not be empty")
         return v
 
     @validator('retype_password')
     def password_match(cls, v, values):
         if 'password' in values and v != values['password']:
-            raise requests_exception.PasswordNotMatchException()
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="password not match")
         return v
 
 
