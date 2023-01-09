@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime
 
+from app.models.base_time import BaseMixin
 from database import Base
-from models import BaseMixin
 
 
 class User(Base, BaseMixin):

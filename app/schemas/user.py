@@ -2,7 +2,8 @@ from pydantic import BaseModel, validator, EmailStr
 
 from error import requests_exception
 
-
+# TODO
+# 상속 구조로 개편
 class UserCreate(BaseModel):
     nick_name: str
     email: EmailStr
