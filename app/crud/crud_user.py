@@ -3,6 +3,7 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from starlette import status
 
+from app.core.security import verify_password
 from app.crud.base import CRUDBase
 from app.models.user import User
 from app.schemas import UserCreate
@@ -40,7 +41,7 @@ class CRUDUser(CRUDBase[User, UserCreate]):
 
     def authenticate(self, db: Session, *, email: str, password: str) -> User:
         user = self.get_user_by_email(db, email=email)
-        if not pwd_context.verify(password, user.password):
+        if not verify_password(password, user.password):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail="Incorrect password")
         return user

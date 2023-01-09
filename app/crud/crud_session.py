@@ -2,14 +2,14 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
 
+from app.core import security
 from app.models import User
 from app.schemas.token import Token
-from util import jwt_util
 
 
 class CRUDSession:
     def create_session(self, db: Session, user: User) -> Token:
-        tokens = jwt_util.create_tokens(user.email)
+        tokens = security.create_tokens(user.email)
 
         user.refresh_token = tokens.refresh_token.token
         user.expire_time = tokens.refresh_token.expire_date
